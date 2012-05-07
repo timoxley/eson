@@ -90,7 +90,7 @@ yields:
 
 ### eson.include
 
-  The include plugin allows you to literally include other JSON files. This works in
+ The include plugin allows you to literally include other JSON files. This works in
   both arrays and object literals, and loads relative to the callee's file. For example:
   
 ```js
@@ -103,6 +103,111 @@ yields:
 
 ```js
 { prod: { whatever: 'is', within: 'config/production.json' }}
+```
+
+ You can also include multiple files via a glob. This has a special syntax and works in one of three ways.
+
+Consider a config folder containing the following two files:
+
+*database.json:*
+```json
+{"db", "redis"}
+```
+*app.json:*
+```json
+{"listen", 3000}
+```
+
+##### Merging multiple files into one:
+
+```js
+
+eson()
+  .use(eson.include)
+  .parse('{ "prod": "include config/*" }');
+```
+yields:
+
+```js
+{
+	prod: {
+		db: "redis",
+		listen: 3000
+	}
+}
+```
+
+##### Collect files into a map, keyed by filename:
+
+```js
+
+// use curly brackets to collect as a map
+eson()
+  .use(eson.include)
+  .parse('{ "prod": "include { config/* }" }');
+
+```
+
+yields:
+
+
+```js
+{
+	prod: {
+		database: {
+			db: "redis"
+		},
+		app: {
+			listen: 3000
+		}
+	}
+}
+
+```
+
+##### Collect files as an array:
+
+
+```js
+
+// use square brackets to collect as an array
+eson()
+  .use(eson.include)
+  .parse('{ "prod": "include [ config/* ]" }'); 
+
+```
+
+yields:
+
+```js
+{
+	prod: [
+		{db: "redis"},
+		{listen: 3000}
+	]
+}
+```
+#### Preprocessing
+
+You can preprocess files based on file extension before including them in the JSON, just remember you must return a valid JSON value.
+```js
+// register a function to handle .md file content
+include.extensions.md = function(fileContent) {
+  var markdown = require('markdown')
+  // JSON stringify ensures content is a valid JSON value
+  return JSON.stringify(markdown.markdown.toHTML(fileContent))
+}
+
+eson()
+  .use(eson.include)
+  .parse('{ "readme": "include readme.md" }');
+
+```
+
+yields:
+
+```js
+{ readme: "<h1>Markdown</h1><p>Content</p>" }
 ```
 
 ### eson.replace(str, val)
