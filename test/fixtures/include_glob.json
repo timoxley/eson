@@ -1,5 +1,8 @@
 {
   "app-config": "include config/{database,http}",
   "user-config": "include { config/{permissions,roles}}",
-  "users": "include [ users/* ]"
+  "users": "include [ users/* ]",
+  "invalid-glob": "include doesnotexists*",
+  "invalid-map": "include {doesnotexists*}",
+  "invalid-array": "include [doesnotexists*]"
 }

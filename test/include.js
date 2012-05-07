@@ -23,19 +23,22 @@ describe('include', function(){
       .should.eql({
         "app-config": { "db": "redis", "listen": 8000 },
         "user-config": { "permissions": { "view videos": "guest", "delete videos": "admin" }, "roles": ["admin", "guest"] },
-        "users":  [ {"username": "Dave"}, {"username": "Tobi"} ]
+        "users":  [ {"username": "Dave"}, {"username": "Tobi"} ],
+        "invalid-glob": "",
+        "invalid-map": {},
+        "invalid-array": []
       })
   })
   it('should parse files using preprocesor', function() {
     include.extensions.md = function(fileContent) {
       // pretend this is a markdown parser
-      return JSON.stringify(fileContent.replace(/^\# +(.*)\n/, "<h1>$1</h1>"));
+      return JSON.stringify(fileContent.toUpperCase())
     }
     Parser()
       .use(include)
       .read('test/fixtures/include_preprocessor.json')
       .should.eql({
-        "readme": "<h1>Hello World</h1>"
+        "readme": "# READ ME\n\nOMG\n"
       })
   })
 })
